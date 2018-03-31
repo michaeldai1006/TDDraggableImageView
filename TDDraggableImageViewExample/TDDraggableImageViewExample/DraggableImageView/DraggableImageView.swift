@@ -8,7 +8,7 @@
 import UIKit
 
 protocol DraggableImageViewDelegate {
-    func imageViewDidSetToDestination(sender: DraggableImageView)
+    func imageViewDidMoveToDestination(sender: DraggableImageView)
     func imageViewDidReturnToOrigin(sender: DraggableImageView)
     func imageViewWillMove(sender: DraggableImageView)
 }
@@ -102,7 +102,7 @@ class DraggableImageView: UIImageView {
                        animations: {
                         self.center = self.destinationView.center
         }) { (result) in
-            self.delegate?.imageViewDidSetToDestination(sender: self)
+            self.delegate?.imageViewDidMoveToDestination(sender: self)
         }
     }
     
