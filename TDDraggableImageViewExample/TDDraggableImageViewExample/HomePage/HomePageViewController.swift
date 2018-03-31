@@ -16,10 +16,20 @@ struct constants {
 class HomePageViewController: UIViewController {
 
     @IBOutlet weak var trashCanView: UIImageView!
+    @IBOutlet weak var restartBtn: UIButton!
     var fileView: DraggableImageView!
+    
+    @IBAction func restartBtnPressed(_ sender: UIButton) {
+        setup()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setup()
+    }
+    
+    private func setup() {
+        restartBtn.isHidden = true
         setupFileView()
     }
     
@@ -39,6 +49,7 @@ class HomePageViewController: UIViewController {
 extension HomePageViewController: DraggableImageViewDelegate {
     func imageViewDidMoveToDestination(sender: DraggableImageView) {
         fileView.removeFromSuperview()
+        restartBtn.isHidden = false
     }
     
     func imageViewDidReturnToOrigin(sender: DraggableImageView) {
