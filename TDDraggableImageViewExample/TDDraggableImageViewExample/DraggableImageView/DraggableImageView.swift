@@ -1,9 +1,8 @@
 //
 //  DraggableImageView.swift
-//  blackjack
 //
 //  Created by michael on 3/14/18.
-//  Copyright © 2018 odinternational. All rights reserved.
+//  Copyright © 2018 Tiancheng Dai. All rights reserved.
 //
 
 import UIKit
@@ -11,6 +10,7 @@ import UIKit
 protocol DraggableImageViewDelegate {
     func imageViewDidSetToDestination(sender: DraggableImageView)
     func imageViewDidReturnToOrigin(sender: DraggableImageView)
+    func imageViewWillMove(sender: DraggableImageView)
 }
 
 class DraggableImageView: UIImageView {
@@ -20,9 +20,11 @@ class DraggableImageView: UIImageView {
     var origin: CGPoint!
     var destinationView: UIView!
     var parentView: UIView!
-    var shadowOffset: CGPoint!
+    var moveDuration: Double!
+    var returnDuration: Double!
+    var enableTapping: Bool!
     
-    init(image: UIImage, origin: CGPoint, destinationView: UIView, parentView: UIView, shadowOffset: CGPoint) {
+    init(image: UIImage, origin: CGPoint, destinationView: UIView, parentView: UIView, moveDuration: Double, returnDuration: Double, enableTapping: Bool) {
         super.init(image: image)
         
         // Move view to origin
@@ -32,23 +34,51 @@ class DraggableImageView: UIImageView {
         self.origin = origin
         self.destinationView = destinationView
         self.parentView = parentView
-        self.shadowOffset = shadowOffset
+        self.moveDuration = moveDuration
+        self.returnDuration = returnDuration
+        self.enableTapping = enableTapping
         
         // Enable user interaction
         self.isUserInteractionEnabled = true
         
         // Add pan gesture
         self.addPanGesture()
+        
+        // Add tap gesture
+        self.addTapGesture()
+    }
+    
+    private func addTapGesture() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(DraggableImageView.handleTap(_:)))
+        self.addGestureRecognizer(tap)
     }
     
     private func addPanGesture() {
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(DraggableImageView.handlePan(sender:)))
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(DraggableImageView.handlePan(_:)))
         self.addGestureRecognizer(pan)
     }
     
-    @objc private func handlePan(sender: UIPanGestureRecognizer) {
+    @objc private func handleTap(_ sender: UITapGestureRecognizer) {
+        // If tapping not enabled, return
+        if (!enableTapping) { return }
+        
+        delegate?.imageViewWillMove(sender: self)
+        self.parentView.bringSubview(toFront: self)
+        
+        if (self.frame.intersects(destinationView.frame)) {
+            returnViewToOrigin()
+        } else {
+            setViewToDestination()
+        }
+    }
+    
+    @objc private func handlePan(_ sender: UIPanGestureRecognizer) {
+        self.parentView.bringSubview(toFront: self)
         switch sender.state {
-        case .began, .changed:
+        case .began:
+            delegate?.imageViewWillMove(sender: self)
+            moveViewWithPan(sender: sender)
+        case .changed:
             moveViewWithPan(sender: sender)
         default:
             if self.frame.intersects(destinationView.frame) {
@@ -59,6 +89,31 @@ class DraggableImageView: UIImageView {
         }
     }
     
+    func returnViewToOrigin() {
+        UIView.animate(withDuration: returnDuration, animations: {
+            self.frame.origin = self.origin
+        }) { (result) in
+            self.delegate?.imageViewDidReturnToOrigin(sender: self)
+        }
+    }
+    
+    func setViewToDestination() {
+        UIView.animate(withDuration: moveDuration,
+                       animations: {
+                        self.center = self.destinationView.center
+        }) { (result) in
+            self.delegate?.imageViewDidSetToDestination(sender: self)
+        }
+    }
+    
+    func turnOffUserInteraction() {
+        self.isUserInteractionEnabled = false
+    }
+    
+    func turnonUserInteraction() {
+        self.isUserInteractionEnabled = true
+    }
+    
     private func moveViewWithPan(sender: UIPanGestureRecognizer) {
         self.parentView.bringSubview(toFront: self)
         
@@ -66,27 +121,6 @@ class DraggableImageView: UIImageView {
         
         self.center = CGPoint(x: self.center.x + translation.x, y: self.center.y + translation.y)
         sender.setTranslation(CGPoint.zero, in: parentView)
-    }
-    
-    func returnViewToOrigin() {
-        UIView.animate(withDuration: 0.5) {
-            self.frame.origin = self.origin
-        }
-        
-        self.delegate?.imageViewDidReturnToOrigin(sender: self)
-    }
-    
-    func setViewToDestination() {
-        UIView.animate(withDuration: 0.5) {
-            self.center = CGPoint(x: self.destinationView.center.x + self.shadowOffset.x,
-                                  y: self.destinationView.center.y + self.shadowOffset.y)
-        }
-        
-        self.delegate?.imageViewDidSetToDestination(sender: self)
-    }
-    
-    func turnOffUserInteraction() {
-        self.isUserInteractionEnabled = false
     }
     
     required init?(coder aDecoder: NSCoder) {
