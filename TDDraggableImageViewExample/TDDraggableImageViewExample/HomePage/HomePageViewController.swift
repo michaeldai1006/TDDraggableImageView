@@ -16,19 +16,36 @@ struct constants {
 class HomePageViewController: UIViewController {
 
     @IBOutlet weak var trashCanView: UIImageView!
+    var fileView: DraggableImageView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // Create DraggableImageView instance and add to home page view as subview
-        let fileView = DraggableImageView(image: UIImage(named: constants.imageName)!,
-                                          origin: self.view.center,
-                                          destinationView: trashCanView,
-                                          parentView: self.view,
-                                          moveDuration: constants.animationDuration,
-                                          returnDuration: constants.animationDuration,
-                                          enableTapping: true)
+        setupFileView()
+    }
+    
+    private func setupFileView() {
+        fileView = DraggableImageView(image: UIImage(named: constants.imageName)!,
+                                      origin: self.view.center,
+                                      destinationView: trashCanView,
+                                      parentView: self.view,
+                                      moveDuration: constants.animationDuration,
+                                      returnDuration: constants.animationDuration,
+                                      enableTapping: true)
+        fileView.delegate = self
         self.view.addSubview(fileView)
     }
 }
 
+extension HomePageViewController: DraggableImageViewDelegate {
+    func imageViewDidMoveToDestination(sender: DraggableImageView) {
+        fileView.removeFromSuperview()
+    }
+    
+    func imageViewDidReturnToOrigin(sender: DraggableImageView) {
+        print("Returned")
+    }
+    
+    func imageViewWillMove(sender: DraggableImageView) {
+        print("Will move")
+    }
+}
