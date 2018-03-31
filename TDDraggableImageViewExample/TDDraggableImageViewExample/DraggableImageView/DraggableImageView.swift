@@ -24,7 +24,7 @@ class DraggableImageView: UIImageView {
     var returnDuration: Double!
     var enableTapping: Bool!
     
-    init(image: UIImage, origin: CGPoint, destinationView: UIView, parentView: UIView, moveDuration: Double, returnDuration: Double, enableTapping: Bool) {
+    init(image: UIImage, origin: CGPoint, destinationView: UIView, parentView: UIView, moveDuration: Double, returnDuration: Double, enableTapping tapping: Bool) {
         super.init(image: image)
         
         // Move view to origin
@@ -36,15 +36,13 @@ class DraggableImageView: UIImageView {
         self.parentView = parentView
         self.moveDuration = moveDuration
         self.returnDuration = returnDuration
-        self.enableTapping = enableTapping
+        self.enableTapping = tapping
         
         // Enable user interaction
         self.isUserInteractionEnabled = true
         
-        // Add pan gesture
+        // Add gesture recognizers
         self.addPanGesture()
-        
-        // Add tap gesture
         self.addTapGesture()
     }
     
@@ -98,9 +96,8 @@ class DraggableImageView: UIImageView {
     }
     
     func setViewToDestination() {
-        UIView.animate(withDuration: moveDuration,
-                       animations: {
-                        self.center = self.destinationView.center
+        UIView.animate(withDuration: moveDuration, animations: {
+            self.center = self.destinationView.center
         }) { (result) in
             self.delegate?.imageViewDidMoveToDestination(sender: self)
         }
