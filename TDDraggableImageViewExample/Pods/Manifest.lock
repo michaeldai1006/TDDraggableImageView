@@ -1,0 +1,12 @@
+PODS:
+  - GSTouchesShowingWindow-Swift (1.0.3)
+
+DEPENDENCIES:
+  - GSTouchesShowingWindow-Swift
+
+SPEC CHECKSUMS:
+  GSTouchesShowingWindow-Swift: 445376c1c5b105996458498adcfde9019be6fa27
+
+PODFILE CHECKSUM: bb53687b6ef99fac767ad38a51a32726f01a708b
+
+COCOAPODS: 1.4.0.beta.2
